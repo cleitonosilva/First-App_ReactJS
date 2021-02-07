@@ -1,4 +1,6 @@
 import { createGlobalStyle} from 'styled-components';
+import bg from '../assets/bg.svg';
+
 
 export default createGlobalStyle `
 *{
@@ -9,7 +11,23 @@ export default createGlobalStyle `
 }
 
 body{
-  background: #F0F0F5
+  background: #F0F0F5 url(${bg}) no-repeat 70% top;
+  -webkit-font-smothing: antialiased;
+
+}
+
+body, input, button{
+  font: 16px Roboto, sans-serif
+}
+
+#root{
+  max-width: 960px;
+  margin: 0 auto;
+  padding:40px 20px;
+}
+
+button{
+  cursor:pointer;
 }
 
 `
