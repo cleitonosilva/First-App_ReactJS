@@ -44,6 +44,12 @@ export const Form = styled.form`
   }
 `;
 
+export const Error = styled.span`
+  display: block;
+  color: #c53030;
+  margin-top: 8px;
+`
+
 export const Repositorys = styled.div`
   margin-top: 80px;
   max-width: 700px;
