@@ -1,7 +1,7 @@
 import React, { useState, FormEvent } from "react";
 import { FiChevronRight } from "react-icons/fi";
 import logoimg from "../../assets/logo.svg";
-import { Title, Form, Repositorys } from "./styles";
+import { Title, Form, Repositorys, Error } from "./styles";
 import api from "../../services/api";
 
 interface Repository {
@@ -15,6 +15,7 @@ interface Repository {
 
 const Dashboard: React.FC = () => {
   const [newRepo, setNewRepo] = useState("");
+  const [inputError, setInputError] = useState("")
 
   // interface são as classes de tipagem do ts e toda vez que utiliza useState deve ser passado o tipo que é a variavel, no caso abaixo éuma array de repository que inicia vazia
   const [repositories, setrepositories] = useState<Repository[]>([]);
@@ -26,11 +27,20 @@ const Dashboard: React.FC = () => {
     // após deixar o event.preventDefault() como primeiro parametro da função
     event.preventDefault();
 
-    const response = await api.get<Repository>(`repos/${newRepo}`);
-    const repository = response.data;
-    setrepositories([...repositories, repository]);
-    setNewRepo('');
-  }
+    if(!newRepo){
+      setInputError('Digite o autor/nome do repositório');
+      return ;
+    }
+    try {
+      const response = await api.get<Repository>(`repos/${newRepo}`);
+      const repository = response.data;
+      setrepositories([...repositories, repository]);
+      setNewRepo('');
+      setInputError('')
+    } catch (err) {
+      setInputError('Erro na busca por esse repositório')
+    };
+  };
 
   return (
     <>
@@ -45,6 +55,9 @@ const Dashboard: React.FC = () => {
         ></input>
         <button type="submit">Pesquisar</button>
       </Form>
+
+
+      { inputError && <Error>{inputError}</Error>}
 
       <Repositorys>
         {repositories.map(x => (
