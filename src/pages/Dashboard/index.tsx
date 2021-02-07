@@ -1,9 +1,69 @@
-import React from 'react';
-import {Title} from './styles'
+import React, { useState, FormEvent } from "react";
+import { FiChevronRight } from "react-icons/fi";
+import logoimg from "../../assets/logo.svg";
+import { Title, Form, Repositorys } from "./styles";
+import api from "../../services/api";
 
+interface Repository {
+  full_name: string;
+  description: string;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
 
 const Dashboard: React.FC = () => {
-  return <Title>Explore repositórios no Github</Title>;
+  const [newRepo, setNewRepo] = useState("");
+
+  // interface são as classes de tipagem do ts e toda vez que utiliza useState deve ser passado o tipo que é a variavel, no caso abaixo éuma array de repository que inicia vazia
+  const [repositories, setrepositories] = useState<Repository[]>([]);
+
+  async function handleAddRepositories(
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> {
+    // adição do repositorio & o (event: FormEvent<HTMLFormElement>) não deixa a tela dar, cuidado com a importação do FormEvent ele sempre espera um <HTMLFormElement>
+    // após deixar o event.preventDefault() como primeiro parametro da função
+    event.preventDefault();
+
+    const response = await api.get<Repository>(`repos/${newRepo}`);
+    const repository = response.data;
+    setrepositories([...repositories, repository]);
+    setNewRepo('');
+  }
+
+  return (
+    <>
+      <img src={logoimg} alt="GitHub Explorer" />
+      <Title>Explore repositórios no Github</Title>
+
+      <Form onSubmit={handleAddRepositories}>
+        <input
+          placeholder="Digite o nome do repositório"
+          value={newRepo}
+          onChange={(x) => setNewRepo(x.target.value)}
+        ></input>
+        <button type="submit">Pesquisar</button>
+      </Form>
+
+      <Repositorys>
+        {repositories.map(x => (
+        <a key={x.full_name} href="teste">
+          <img
+            src={x.owner.avatar_url}
+            alt={x.owner.login}
+          />
+          <div>
+            <strong>{x.full_name}</strong>
+            <p>{x.description}</p>
+          </div>
+          <FiChevronRight size={20} />
+        </a>
+      ))}
+      </Repositorys>
+
+    </>
+  );
 };
 
 export default Dashboard;
