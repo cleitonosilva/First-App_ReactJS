@@ -1,4 +1,4 @@
-import React, { useState, FormEvent } from "react";
+import React, { useState, FormEvent, useEffect } from "react";
 import { FiChevronRight } from "react-icons/fi";
 import logoimg from "../../assets/logo.svg";
 import { Title, Form, Repositorys, Error } from "./styles";
@@ -18,7 +18,21 @@ const Dashboard: React.FC = () => {
   const [inputError, setInputError] = useState("")
 
   // interface são as classes de tipagem do ts e toda vez que utiliza useState deve ser passado o tipo que é a variavel, no caso abaixo éuma array de repository que inicia vazia
-  const [repositories, setrepositories] = useState<Repository[]>([]);
+  const [repositories, setrepositories] = useState<Repository[]>(()=> {
+    const storagedRepositories = localStorage.getItem('@githubExplorer:repositories');
+    if(storagedRepositories){
+      // utilizando JSON.parse para retornar o valor como arry
+      return JSON.parse(storagedRepositories);
+    }else{
+      return [];
+    }
+  });
+
+  useEffect(()=> {
+      // utilizando JSON.stringfy para fazer o casting para string
+
+    localStorage.setItem('@githubExplorer:repositories', JSON.stringify(repositories));
+  });
 
   async function handleAddRepositories(
     event: FormEvent<HTMLFormElement>
@@ -47,7 +61,7 @@ const Dashboard: React.FC = () => {
       <img src={logoimg} alt="GitHub Explorer" />
       <Title>Explore repositórios no Github</Title>
 
-      <Form onSubmit={handleAddRepositories}>
+      <Form hasError={!!inputError} onSubmit={handleAddRepositories}>
         <input
           placeholder="Digite o nome do repositório"
           value={newRepo}
