@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import { useRouteMatch} from 'react-router-dom'
 import api from "../../services/api";
 
@@ -9,22 +9,46 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 import { Header, RepositoryInfo, Issues } from "./styles";
 
-
-
-
 // interface é a classe e se declara a classe com <> antes de executar a função
 interface RepositoryParams{
   repository: string;
 }
+
+
+interface Repository {
+  full_name: string;
+  description: string;
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  owner: {
+    login: string;
+    avatar_url: string;
+  };
+}
+
+interface Issue{
+  id: number;
+  title: string;
+  html_url: string;
+  user: {
+    login: string
+  };
+}
+
 const Repository: React.FC = () => {
+
+  const [repository, setRepository] = useState<Repository | null>(null);
+  const [issues, setIssues] = useState<Issue[]>([]);
+
   const { params } = useRouteMatch<RepositoryParams>();
 
   useEffect(() => {
     api.get(`repos/${params.repository}`).then(response => {
-      console.log(response.data)
+      setRepository(response.data)
     });
     api.get(`repos/${params.repository}/issues`).then(response => {
-    console.log(response.data)
+      setIssues(response.data)
   });
 }
 
@@ -50,43 +74,51 @@ const Repository: React.FC = () => {
       <Link to="/"> <FiChevronLeft size={16}/>Voltar</Link>
     </Header>
 
-    <RepositoryInfo>
+    {repository ?(
+      <RepositoryInfo>
       <header>
-        <img src="https://avatars.githubusercontent.com/u/66958728?s=400&u=de3b173ec4b5be1d5a7f23f865b0170f47c784cb&v=4" alt=""/>
+        <img src={repository.owner.avatar_url} alt={repository.owner.login}/>
       <div>
-        <strong>Repositorio de Cleiton</strong>
-        <p> descrição do repositório</p>
+        <strong>{repository.full_name}</strong>
+        <p> {repository.description}</p>
       </div>
       </header>
       <ul>
         <li>
-        <strong>1808</strong>
+        <strong>{repository.stargazers_count}</strong>
         <span>Stars</span>
         </li>
 
         <li>
-        <strong>48</strong>
+        <strong>{repository.forks_count}</strong>
         <span>Forks</span>
         </li>
 
 
         <li>
-        <strong>67</strong>
+        <strong>{repository.open_issues_count}</strong>
         <span>Issues</span>
         </li>
 
       </ul>
     </RepositoryInfo>
+    ): (<p>Carregando...</p>) }
+
 
     <Issues>
-        <Link to={`/`}>
+        {issues.map(res => (
 
-          <div>
-            <strong>hatshha s</strong>
-            <p> jajuhsuha </p>
-          </div>
-          <FiChevronRight size={20} />
-        </Link>
+        <a key={res.id} href={res.html_url}>
+
+        <div>
+          <strong>{res.title}</strong>
+          <p> {res.user.login} </p>
+        </div>
+        <FiChevronRight size={20} />
+        </a>
+
+
+        ) )}
 
 
 
